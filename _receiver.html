@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="global.css">
+
+  <title>WebRTC Tech Demo</title>
+  <style>
+    pre {
+      font-size: xx-small;
+      white-space: pre-wrap;
+    }
+
+    b {
+      color: var(--primary-3);
+    }
+
+    i {
+      color: var(--secondary-3);
+    }
+  </style>
+</head>
+
+<body>
+  <a href="index.html">index</a> > <a href="s-device-m-tab.html">demo</a>
+  <h1>Receiving tab</h1>
+  <h2>Step 1: Create an offer</h2>
+  <p>Create the offer from the intiator tab.</p>
+
+  <h2>Step 2: Answer a offer</h2>
+  <p>Enter the offer here. This is where a signalling server can be used.</p>
+  <input id="answer-in" type="textarea" placeholder="Paste the offer here">
+  <button id="answer-btn">Answer</button>
+  <pre id="answer-out"></pre>
+  <button id="clip-answer-btn" disabled>Copy</button>
+
+  <h2>Step 3: Transfer to Initiator</h2>
+  <p>Copy the answer back to the intiator tab.</p>
+
+  <h2>Step 4: Communicate</h2>
+
+  <p><button id="send-btn" disabled>Send</button> <i>Confirm comms with the initiator</i></p>
+
+  <h2>History</h2>
+  <p id="history"></p>
+</body>
+
+<script lang="js">
+  const UI = {
+    answerIn: document.getElementById("answer-in"),
+    answerBtn: document.getElementById("answer-btn"),
+    answerOut: document.getElementById("answer-out"),
+    clipAnswerBtn: document.getElementById("clip-answer-btn"),
+    sendBtn: document.getElementById("send-btn"),
+    history: document.getElementById('history')
+  };
+
+  function answerOffer() {
+    log('Answering...');
+    const namespace = "P2";
+    const peerConnection = createPeerConnection(() => { }, namespace);
+
+    /** This connection is negotiated in-band */
+    peerConnection.ondatachannel = (event) => {
+      setupDataChannel(event.channel, namespace);
+      UI.sendBtn.addEventListener("click", () => { log(namespace, "Check the initiator"); event.channel.send("Hello from the receiver"); });
+    };
+
+    const offer = JSON.parse(UI.answerIn.value);
+    peerConnection.setRemoteDescription(offer)
+      .then(() => peerConnection.createAnswer())
+      .then((answer) => peerConnection.setLocalDescription(answer))
+      .then(() => UI.answerOut.innerText = JSON.stringify(peerConnection.localDescription))
+      .catch((error) => log(namespace, 'Error answering offer:', error));
+
+    UI.answerBtn.disabled = true;
+    UI.answerIn.disabled = true;
+    UI.clipAnswerBtn.disabled = false;
+    UI.sendBtn.disabled = false;
+  }
+
+  function createPeerConnection(callback, namespace) {
+    log(namespace, 'Creating peer connection without STUN server');
+    const conn = new RTCPeerConnection();
+    conn.onicecandidate = (event) => {
+      if (!event.candidate) {
+        log(namespace, 'ICE candidate gathering complete');
+        callback();
+        return;
+      }
+      log(namespace, 'New ICE candidate:', event.candidate);
+    };
+    conn.onconnectionstatechange = (event) => log(namespace, 'Connection state change: <b>', conn.connectionState, "</b>");
+    conn.oniceconnectionstatechange = (event) => log(namespace, 'ICE connection state change: <b>', conn.iceConnectionState, "</b>");
+    return conn;
+  }
+
+  function setupDataChannel(dataChannel, namespace) {
+    log(namespace, 'Setting up data channel');
+    dataChannel.onopen = (event) => { log(namespace, 'Data channel opened', event) };
+    dataChannel.onmessage = (event) => { log(namespace, 'Received message: <b>', event.data, "</b>") };
+    return dataChannel;
+  }
+
+  function clip(id) {
+    const el = document.getElementById(id);
+    navigator.clipboard.writeText(el.innerText);
+    log(`Copied #${id} to clipboard`);
+  }
+
+  function log(namespace, ...messages) {
+    console.log(namespace, ...messages);
+    const timestamp = new Date().toLocaleTimeString();
+    const formattedMessage = `<b>[${timestamp}]</b> --<i>${namespace}</i>-- ${messages.join(' ')}`;
+    UI.history.innerHTML += formattedMessage + '<br/>';
+    UI.history.scrollTop = UI.history.scrollHeight;
+  }
+
+  UI.answerBtn.addEventListener("click", answerOffer);
+  UI.clipAnswerBtn.addEventListener("click", () => clip('answer-out'));
+</script>
+
+</html>
