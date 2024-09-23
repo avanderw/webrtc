@@ -25,8 +25,14 @@
 
 <body>
   <a href="index.html">index</a>
-  <h1>Same device, multi-tab</h1>
-  <p>This demo also works across browsers on the same device. Open the initiator and receiver in different browsers instead of tabs to test.</p>
+  <h1>Local Network Demo</h1>
+  <p>
+    This demo does not have a STUN server configured. It is intended to work on a local network.
+    It was developed with opening the initiator and receiver in different tabs on the same browser.
+    You can also open the initiator and receiver on different browsers or devices instead of tabs.
+    For different devices firewalls may cause issues blocking UDP ports used for the negotiation.
+    Try reversing the initator and receiver roles if you run into this issue.
+  </p>
   <ul>
     <li>Offer here: <a href="no-stun-initiator.html" target="_blank">Initiator</a> <i>(opens new tab)</i></li>
     <li>Answer here: <a href="no-stun-receiver.html" target="_blank">Receiver</a> <i>(opens new tab)</i></li>

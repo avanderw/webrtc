@@ -10,13 +10,13 @@ Any infrastructure required should be minimal and free. Thus, no TURN server.
 - [x] Same device, same tab.
 - [x] Same device, different tabs.
 - [x] Same device, different browsers.
-- [ ] Different devices, same network.
+- [x] Different devices, same network.
 - [ ] Different devices, different networks.
 - [ ] Establish a stable serverless connection between multiple clients using WebRTC.
 
 ## Quickstart
 
-Open the `index.html` file in your browser.
+Clone the repository and open the `index.html` file in your browser or visit [my site for this repository](https://avanderw.co.za/webrtc/).
 
 ## Motivation
 
@@ -50,4 +50,5 @@ This is a last resort, as it is not ideal for performance.
 
 - https://github.com/lesmana/webrtc-without-signaling-server
 - https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel
+- https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Perfect_negotiation
 - https://github.com/feross/simple-peer?tab=readme-ov-file#data-channels
